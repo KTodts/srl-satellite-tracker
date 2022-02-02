@@ -1,0 +1,18 @@
+satellite:
+   path: /etc/opt/srlinux/appmgr/satellite_agent/
+   launch-command: /etc/opt/srlinux/appmgr/satellite_agent/satellite.sh
+   search-command:
+       /bin/bash /etc/opt/srlinux/appmgr/satellite_agent/satellite.sh
+   wait-for-config: No
+   failure-threshold: 10
+   failure-action: wait=forever
+   run-as-user: root
+   restricted-operations: ['kill','quit','restart','reload']
+   author: 'Kevin'
+   #version-command:
+   #    /etc/opt/srlinux/appmgr/satellite_agent/satellite_version.sh
+   yang-modules:
+       names:
+           - "satellite"
+       source-directories:
+           - "/etc/opt/srlinux/appmgr/satellite_agent/yang/"

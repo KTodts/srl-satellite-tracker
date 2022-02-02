@@ -1,0 +1,100 @@
+module satellite {
+
+    yang-version "1";
+
+    // namespace
+    namespace "urn:srl_ndk/satellite";
+
+    prefix "satellite";
+
+    revision "2021-08-17";
+
+    typedef float {
+	type decimal64 {
+		fraction-digits 12;
+	}
+    }
+    
+    //grouping can be compared to struct in C. You define it and then use it.
+    grouping satellite-top {
+        description "Top level grouping for satellite sample app";
+
+        container satellite {
+            leaf norad-id {
+                description "The satellite catalog number also known as NORAD";
+                type uint32;
+		default 25544;
+		config true;
+                }
+            leaf interval {
+                description "Set the sample interval in seconds";
+                type uint32{
+			range "3..100";
+		}	
+                default 10;
+                config true;
+                }
+            leaf name {
+		description "Name of the satellite";
+                type string;
+                config false;
+                }
+            leaf id {
+		description "NORAD id of the satellite";
+                type string;
+                config false;
+                }
+	    leaf latitude {
+                description "Latitude of the satellite";
+                type string;
+		config false;
+                }
+            leaf longitude {
+		description "Longitude of the satellite";
+		type string;
+                config false;
+		}
+            leaf altitude {
+		description "Altitude of the satellite";
+                type string;
+		config false;
+                }
+            leaf velocity {
+		description "Velocity of the satellite";
+                type string;
+   		config false;
+                }
+            leaf visibility {
+                type string;
+                config false;
+                }
+            leaf footprint {
+                type string;
+                config false;
+                }
+            leaf timestamp {
+                type string;
+                config false;
+                }
+            leaf daynum {
+                type string;
+                config false;
+                }
+            leaf solar-lat {
+                type string;
+                config false;
+                }
+            leaf solar-lon {
+                type string;
+                config false;
+                }
+            leaf units {
+                type string;
+                config false;
+                }
+        }
+    }
+
+    // data definition statements
+    uses satellite-top;
+}
