@@ -8,7 +8,7 @@ satellite:
    failure-action: wait=forever
    run-as-user: root
    restricted-operations: ['kill','quit','restart','reload']
-   author: 'Kevin'
+   author: 'Kevin Todts'
    #version-command:
    #    /etc/opt/srlinux/appmgr/satellite_agent/satellite_version.sh
    yang-modules:

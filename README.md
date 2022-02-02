@@ -1,1 +1,1 @@
-# srl-satellite-tracker
+# SR Linux Satellite Tracker
