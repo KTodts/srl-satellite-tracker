@@ -1,2 +1,2 @@
 # SR Linux Satellite Tracker
-![](./img/srl2.jpg)
+![](./img/srl3.jpg)
