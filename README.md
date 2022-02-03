@@ -5,6 +5,18 @@ the NOS on a whole new level: directly installing routes and MPLS routes in the 
 
 The satellite tracker agent fetches every x seconds the current location of the ISS from the internet by making an http request to https://api.wheretheiss.at/v1/satellites/25544. Once the data is fetched the agent will store this information in the state data store as described by its YANG model. The show satellite command will retrieve the geo location from the state datastore and present it in an ASCII world map where it is. The python-based cli has been extended to display the map and geolocation in a custom way by using a custom formatter which is part of the cli-plugin framework SR Linux offers.
 ## Installing the SRL agent
+Clone the repository and copy the rpm file to your SR Linux node
+```
+[root@kevin-pod75 srl-satellite-tracker]# scp rpm/srl-satellite-tracker-0.1.0.x86_64.rpm admin@clab-basic-srlinux1:/tmp
+srl-satellite-tracker-0.1.0.x86_64.rpm                                                                                                                          100%   11KB   4.3MB/s   00:00
+[root@kevin-pod75 srl-satellite-tracker]#
+
+```
+Install the rpm package by logging into SR Linux cli and drill down to the linux bash shell
+```
+sudo rpm -U /tmp/srl-satellite-tracker-0.1.0.x86_64.rpm
+```
+
 
 ## Configuration
 Once the agent is installed we have to activate it before we can use it.
