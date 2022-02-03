@@ -7,7 +7,27 @@ The satellite tracker agent fetches every x seconds the current location of the 
 ## Installing the SRL agent
 
 ## Configuration
-DNS needs to be configured for the mgmt network-instance to make sure the agent can find the api end point. In this example we use Google DNS servers
+Once the agent is installed we have to activate it by reloading app_mgr process.
+```
+/ tools system app-management application app_mgr reload
+```
+### Loading the agent
+
+### Configuring DNS
+DNS needs to be configured for the mgmt network-instance to make sure the agent can find the api end point. In this example we use Google DNS servers.
+
+```
+enter candidate
+set / system dns network-instance mgmt
+set / system dns server-list [ 8.8.8.8 8.8.4.4]
+commit stay
+```
 
 Sometime it's needed to set the local DNS entries
+
+```
+enter candidate
+set /system dns host-entry api.wheretheiss.at ipv4-address 69.164.207.240
+commit stay
+```
 
