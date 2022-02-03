@@ -7,12 +7,21 @@ The satellite tracker agent fetches every x seconds the current location of the 
 ## Installing the SRL agent
 
 ## Configuration
-Once the agent is installed we have to activate it by reloading app_mgr process.
+Once the agent is installed we have to activate it before we can use it.
+### Loading the agent
+We activate the agent by reloading the app_mgr process
 ```
 / tools system app-management application app_mgr reload
 ```
-### Loading the agent
-
+Verify that the agent is running. In this example iit has PID of 3624
+```
+A:srlinux1# show system application satellite
+  +-----------+------+---------+---------+--------------------------+
+  |   Name    | PID  |  State  | Version |       Last Change        |
+  +===========+======+=========+=========+==========================+
+  | satellite | 3624 | running |         | 2022-02-02T19:18:39.546Z |
+  +-----------+------+---------+---------+--------------------------+
+```
 ### Configuring DNS
 DNS needs to be configured for the mgmt network-instance to make sure the agent can find the api end point. In this example we use Google DNS servers.
 
@@ -23,11 +32,17 @@ set / system dns server-list [ 8.8.8.8 8.8.4.4]
 commit stay
 ```
 
-Sometime it's needed to set the local DNS entries
+Sometimes it's needed to set the local DNS entries
 
 ```
 enter candidate
 set /system dns host-entry api.wheretheiss.at ipv4-address 69.164.207.240
 commit stay
 ```
-
+### Configure sample interval
+The agent will fetch data every 10 seconds by default. This can be changed by setting the satellite interval
+```
+enter candidate
+set / satellite interval 100
+commit stay
+```
