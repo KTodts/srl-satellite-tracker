@@ -65,14 +65,14 @@ enter candidate
 set / satellite interval 100
 commit stay
 ```
-### Usage
+## Usage
 The ISS is represented on the map as a '#' character when the show satellite command is invoked. The longitude and latitude locations are converted to 2D coordinates on the ASCII map.
 ![](./img/satmap.PNG)
 ![](./img/srlsat.PNG)
 ### State
 The agent stores all retrieved information in the state data store. This allows us to do telemetry with [gNMIc](https://gnmic.kmrd.dev/) for example or visualize the data as json or in table view.
 ![](./img/satellite.gif)
-## Start/Stop application
+### Start/Stop application
 ```
 A:srlinux1# / tools system app-management application satellite stop
 ```
