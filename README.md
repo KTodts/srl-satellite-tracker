@@ -57,6 +57,7 @@ enter candidate
 set /system dns host-entry api.wheretheiss.at ipv4-address 69.164.207.240
 commit now
 ```
+**[Note]:** If you are running SR Linux with a docker image you may also need to add the DNS servers to `/etc/resolv.conf` manually.
 ### Configure sample interval
 The agent will fetch data every 10 seconds by default. This can be changed by setting the satellite interval
 ```
