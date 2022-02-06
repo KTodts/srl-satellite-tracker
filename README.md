@@ -8,7 +8,6 @@ The satellite tracker agent fetches every x seconds the current location of the 
 Clone the repository and copy the rpm file to your SR Linux node
 ```
 scp rpm/srl-satellite-tracker-0.1.0.x86_64.rpm admin@clab-basic-srlinux1:/tmp
-
 ```
 Install the rpm package by logging into SR Linux cli and enter the linux bash shell
 ```
@@ -67,6 +66,7 @@ commit now
 ```
 ## Usage
 The ISS is represented on the map as a '#' character when the show satellite command is invoked. The longitude and latitude locations are converted to 2D coordinates on the ASCII map.
+
 ![](./img/esa.PNG)
 ![](./img/satellite-cli.gif)
 ### State
