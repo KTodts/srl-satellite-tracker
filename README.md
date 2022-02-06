@@ -1,9 +1,9 @@
 # SR Linux Satellite Tracker
-![](./img/srl2.jpg)
+![](./img/header.jpg)
 With SR Linux we provide a NetOps Development Kit (NDK) for writing your own on-box applications which we refer to as agents. This protobuf-based gRPC framework allows users to interact with 
-the NOS on a whole new level: directly installing routes or MPLS routes in the FIB, receiving notifications when state changes for interfaces, BFD sessions or LLDP neighborships. Or, you make an application that can track the international space station location. But why on earth would you make such an application for a router you may ask? Just because we can :sunglasses:
+the NOS on a whole new level: directly installing routes or MPLS routes in the FIB, receiving notifications when state changes for interfaces, BFD sessions or LLDP neighborships. Or, you make an application that can track the international space station location. But why on earth would you make such application for a router you may ask? Just because we can :sunglasses:
 
-The satellite tracker agent fetches every x seconds the current location of the ISS from the internet by making an http request to https://api.wheretheiss.at/v1/satellites/25544. Once the data is fetched the agent will store this information in the state data store as described by its YANG model. The show satellite command will retrieve the geo location from the state datastore and present it in an ASCII world map where it is. The python-based cli has been extended to display the map and geolocation in a custom way by using a custom formatter which is part of the cli-plugin framework SR Linux offers.
+The satellite tracker agent fetches every x seconds the current location of the ISS from the internet by making an http request to https://api.wheretheiss.at/v1/satellites/25544. Once the data is fetched the agent will store this information in the state data store as described by its YANG model. The `show satellite` command will retrieve the geo location from the state datastore and present it in an ASCII world map where it is. The python-based cli has been extended to display the map and geolocation in a custom way by using a custom formatter which is part of the cli-plugin framework SR Linux offers. Learn more about SR Linux [here](https://learn.srlinux.dev/).
 ## Installing the SRL agent
 Clone the repository and copy the rpm file to your SR Linux node
 ```
@@ -56,22 +56,22 @@ Sometimes it's needed to set the local DNS entries
 ```
 enter candidate
 set /system dns host-entry api.wheretheiss.at ipv4-address 69.164.207.240
-commit stay
+commit now
 ```
 ### Configure sample interval
 The agent will fetch data every 10 seconds by default. This can be changed by setting the satellite interval
 ```
 enter candidate
 set / satellite interval 100
-commit stay
+commit now
 ```
 ## Usage
 The ISS is represented on the map as a '#' character when the show satellite command is invoked. The longitude and latitude locations are converted to 2D coordinates on the ASCII map.
-![](./img/satmap.PNG)
-![](./img/srlsat.PNG)
+![](./img/esa.PNG)
+![](./img/satellite-cli.gif)
 ### State
 The agent stores all retrieved information in the state data store. This allows us to do telemetry with [gNMIc](https://gnmic.kmrd.dev/) for example or visualize the data as json or in table view.
-![](./img/satellite.gif)
+![](./img/satellite-cli.gif)
 ### Start/Stop application
 ```
 A:srlinux1# / tools system app-management application satellite stop
