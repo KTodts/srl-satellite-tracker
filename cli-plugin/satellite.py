@@ -15,36 +15,36 @@ from srlinux.data.utilities import Percentage
 import json
 
 class Plugin(CliPlugin):
-    
+
     '''
     Load() method: load new CLI command at CLI startup
     In: cli, the root node of the CLI command hierachy
     '''
     def load(self, cli, **_kwargs):
         syntax = Syntax('satellite', help='Display all satellite statistics')
-        
+
         print("Loading CLI:", syntax)
-        
+
         cli.show_mode.add_command(
                 syntax,
                 update_location=False,
                 callback=self._print,
                 schema=self._my_schema()
                 )
-   
+
     '''
     _my_schema() method: contruct schema for this CLI command
     Return: schema object
     '''
     def _my_schema(self):
         root = FixedSchemaRoot()
-        
+
         satellite = root.add_child(
                 'satellite',
-                fields=['Name','ID','Latitude','Longitude','Altitude','Velocity','Visibility','Footprint','Timestamp','Daynum','Solar-lat','Solar-lon','Units'])
+                fields=['Name','ID','Timestamp','Latitude','Longitude','Altitude','Velocity','Visibility','Footprint','Daynum','Solar-lat','Solar-lon','Units'])
 
         return root
-   
+
     '''
     _fetch_state() method: extract relevant data from the state datastore
     In: state, reference to the datastores
@@ -78,13 +78,13 @@ class Plugin(CliPlugin):
             node = schema.satellite.create()
             node.name = satellite.name
             node.id = satellite.id
+            node.timestamp = satellite.timestamp
             node.latitude = satellite.latitude
             node.longitude = satellite.longitude
             node.altitude = satellite.altitude
             node.velocity = satellite.velocity
             node.visibility = satellite.visibility
             node.footprint = satellite.footprint
-            node.timestamp = satellite.timestamp
             node.daynum = satellite.daynum
             node.solar_lat = satellite.solar_lat
             node.solar_lon = satellite.solar_lon
@@ -113,7 +113,7 @@ class Plugin(CliPlugin):
         #print('child_names', *state_datastore.child_names)
         #for child in state_datastore.iter_children():
         #    if 'satellite' in str(child):
-        #        print("child", child)        
+        #        print("child", child)
         #        for field, value in zip(child.field_names, child.field_values):
         #            print(f"    {field} = {value}")
 
@@ -127,7 +127,7 @@ class Plugin(CliPlugin):
 #
 ######################################################################
 class WorldMapFormatter(Formatter):
-    
+
     worldmap_list = [
         "|                                                                       |",
         "|          . _..::__:  ,-\"-\"._        |]       ,     _,.__              |",
@@ -160,40 +160,52 @@ class WorldMapFormatter(Formatter):
         self.height = 25
 
         self.worldmap = [list(line.strip()) for line in self.worldmap_list]
-    
+
     def _map_coordinates(self, x, in_min, in_max, out_min, out_max):
         return round((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
 
-    
+
     def iter_format(self, entry, max_width):
-       
-        ## Convert lat. and lon. into 2D coordinates on the worldmap    
-        lat = self._map_coordinates(float(entry.latitude),90,-90,0,self.height-1)
-        lon = self._map_coordinates(float(entry.longitude),-180,180,0,self.width-1)
+        if entry.name:
+            ## Convert lat. and lon. into 2D coordinates on the worldmap
+            lat = self._map_coordinates(float(entry.latitude),90,-90,0,self.height-1)
+            lon = self._map_coordinates(float(entry.longitude),-180,180,0,self.width-1)
 
-        self.worldmap[lat][lon] = '#' 
+            self.worldmap[lat][lon] = '\033[5;92m#\033[00m' ## Using ANSI escape codes to print color
 
 
-        position = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+            position = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
 
-        data = [f"\tName        : {entry.name}",
-                f"\tId          : {entry.id}",
-                f"\tLatitude    : {entry.latitude}",
-                f"\tLongitude   : {entry.longitude}",
-                f"\tAltitude    : {entry.altitude}",
-                f"\tVelocity    : {entry.velocity}",
-                f"\tVisibility  : {entry.visibility}",
-                f"\tFootprint   : {entry.footprint}",
-                f"\tTimestamp   : {entry.timestamp}",
-                f"\tDaynum      : {entry.daynum}",
-                f"\tSolar lat.  : {entry.solar_lat}",
-                f"\tSolar lon.  : {entry.solar_lon}",
-                f"\tUnits       : {entry.units}",
-                f"\tCharacter   : '#'"]
+            data = [f"\tName        : {entry.name}",
+                    f"\tId          : {entry.id}",
+                    f"\tTimestamp   : {entry.timestamp}",
+                    f"\tLatitude    : {entry.latitude}",
+                    f"\tLongitude   : {entry.longitude}",
+                    f"\tAltitude    : {entry.altitude}",
+                    f"\tVelocity    : {entry.velocity}",
+                    f"\tVisibility  : {entry.visibility}",
+                    f"\tFootprint   : {entry.footprint}",
+                    f"\tDaynum      : {entry.daynum}",
+                    f"\tSolar lat.  : {entry.solar_lat}",
+                    f"\tSolar lon.  : {entry.solar_lon}",
+                    f"\tUnits       : {entry.units}",
+                    f"\tCharacter   : \033[92m'#'\033[00m"]
 
-        for i, row in enumerate(self.worldmap):
-            if i in position:
-                line = "".join(row) + data[position.index(i)]
-            else:
-                line = "".join(row)
-            yield line
+            for i, row in enumerate(self.worldmap):
+                if i in position:
+                    line = "".join(row) + data[position.index(i)]
+                else:
+                    line = "".join(row)
+                yield line
+        else:
+            position = [1,2]
+
+            data = [f"\tWe have lost connection to the space station",
+                    f"\tPlease contact your local astronaut!"]
+
+            for i, row in enumerate(self.worldmap):
+                if i in position:
+                    line = "".join(row) + data[position.index(i)]
+                else:
+                    line = "".join(row)
+                yield line
