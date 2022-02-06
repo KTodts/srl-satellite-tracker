@@ -71,7 +71,7 @@ The ISS is represented on the map as a '#' character when the show satellite com
 ![](./img/satellite-cli.gif)
 ### State
 The agent stores all retrieved information in the state data store. This allows us to do telemetry with [gNMIc](https://gnmic.kmrd.dev/) for example or visualize the data as json or in table view.
-![](./img/satellite-cli.gif)
+![](./img/satellite-state.gif)
 ### Start/Stop application
 ```
 A:srlinux1# / tools system app-management application satellite stop
