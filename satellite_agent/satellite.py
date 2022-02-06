@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 import urllib.request
+import urllib.error
 import netns
 
 import grpc
@@ -168,7 +169,7 @@ def process_config_notification(obj):
     data = json.loads(obj.config.data.json)
     logging.info(f"Data :: {data}" )
 
-    # Check if the expected 'name' filed is present
+    # Check if the expected 'interval' filed is present
     if 'interval' in data:
 
         # extract its value from dictionary
@@ -192,7 +193,7 @@ def update_state_datastore( js_path, js_data ):
     telemetry_update_request = telemetry_service_pb2.TelemetryUpdateRequest()
 
     # Add the YANG Path and Attribute/Value pair to the request
-    #for js_path,js_data in path_obj_list:
+    # for js_path,js_data in path_obj_list:
     telemetry_info = telemetry_update_request.state.add()
     telemetry_info.key.js_path = js_path
     telemetry_info.data.json_content = js_data
@@ -207,45 +208,88 @@ def update_state_datastore( js_path, js_data ):
 
     return telemetry_response
 
+############################################################
+## delete a object in the state datastore
+## using the telemetry grpc service
+## Input parameters:
+## - js_path: JSON Path = the base YANG container
+############################################################
+def delete_state_datastore(js_paths):
+
+    # create gRPC client stub for the Telemetry Service
+    telemetry_stub = telemetry_service_pb2_grpc.SdkMgrTelemetryServiceStub(channel)
+
+    # Build an telemetry delete service request
+    telemetry_del_request = telemetry_service_pb2.TelemetryDeleteRequest()
+
+    # Specify which YANG path to delete
+    for path in js_paths:
+      telemetry_key = telemetry_del_request.key.add()
+      telemetry_key.js_path = path
+
+    # Log the request
+    logging.info(f"Telemetry_Delete_Request :: {telemetry_del_request}")
+
+    # Call the telemetry RPC
+    telemetry_response = telemetry_stub.TelemetryDelete(request=telemetry_del_request, metadata=metadata)
+    return telemetry_response
+
 ## Fetch data with http request.
 def http_request(url):
-    # switch namespace when making http request
+    ## switch namespace when making http request
     with netns.NetNS(nsname="srbase-mgmt"):
-        response = urllib.request.urlopen(url).read()
-    
-    data = response.decode('utf-8')
-    data = json.loads(data)
+        try:
+            response = urllib.request.urlopen(url).read()
+            data = response.decode('utf-8')
+            data = json.loads(data)
+
+        except urllib.error.HTTPError as e:
+            logging.error(f"HTTPError raised with error: {e}")
+            data = {}
+        except urllib.error.URLError as e:
+            logging.error(f"URLError raised with error: {e}")
+            data = {}
+
     return data
 
 ## Get satellite data thread: fetch data every X seconds. X defined by user. default 10 seconds
 def get_satellite_data():
     ## exit the thread when sigterm is received
     while not sigterm_exit:
-        ## make the http request 
+        ## make the http request
         url = "https://api.wheretheiss.at/v1/satellites/25544"
         response = http_request(url)
 
-        # Convert dict to a dict TelemtryUpdateRequests understands
-        data = {k:{"value":str(v)} for k,v in response.items()}
-        logging.info(f"DATA for Telemetry :: {data}")
+        if response:
+            ## Convert dict to a dict TelemtryUpdateRequests understands
+            data = {k:{"value":str(v)} for k,v in response.items()}
 
-        ## Update State datastore
-        logging.info(f"name         = {response['name']}")
-        logging.info(f"id           = {response['id']}")
-        logging.info(f"latitude     = {response['latitude']}")
-        logging.info(f"longitude    = {response['longitude']}")
-        logging.info(f"altitude     = {response['altitude']}")
-        logging.info(f"velocity     = {response['velocity']}")
-        logging.info(f"visibility   = {response['visibility']}")
-        logging.info(f"footprint    = {response['footprint']}")
-        logging.info(f"timestamp    = {response['timestamp']}")
-        logging.info(f"daynum       = {response['daynum']}")
-        logging.info(f"solar_lat    = {response['solar_lat']}")
-        logging.info(f"solar_lon    = {response['solar_lon']}")
-        logging.info(f"units        = {response['units']}")
+            logging.info(f"DATA for Telemetry :: {data}")
 
-        update_state_datastore( js_path='.satellite',js_data=json.dumps(data))
-    
+            ## Convert epoch timestamp and update dictionary
+            date = datetime.datetime.fromtimestamp( int(data['timestamp']['value']) )
+            data['timestamp']['value'] = str(date)
+
+            ## Update State datastore
+            logging.info(f"name         = {data['name']['value']}")
+            logging.info(f"id           = {data['id']['value']}")
+            logging.info(f"latitude     = {data['latitude']['value']}")
+            logging.info(f"longitude    = {data['longitude']['value']}")
+            logging.info(f"altitude     = {data['altitude']['value']}")
+            logging.info(f"velocity     = {data['velocity']['value']}")
+            logging.info(f"visibility   = {data['visibility']['value']}")
+            logging.info(f"footprint    = {data['footprint']['value']}")
+            logging.info(f"timestamp    = {data['timestamp']['value']}")
+            logging.info(f"daynum       = {data['daynum']['value']}")
+            logging.info(f"solar_lat    = {data['solar_lat']['value']}")
+            logging.info(f"solar_lon    = {data['solar_lon']['value']}")
+            logging.info(f"units        = {data['units']['value']}")
+
+            update_state_datastore( js_path='.satellite',js_data=json.dumps(data))
+        else:
+            logging.error("HTTP request failed. Please verify DNS settings or internet connectivity")
+            delete_state_datastore(['.satellite'])
+
         # Set sample interval
         global interval
         time.sleep(float(interval))
@@ -266,7 +310,7 @@ def run_agent():
     else:
         logging.info(f"Agent Registration successful. App ID: {register_response.app_id}")
 
-     ## Start separate thread to send keep alive every 10 seconds
+    ## Start separate thread to send keep alive every 10 seconds
     thread = threading.Thread(target=send_keep_alive)
     thread.start()
 
@@ -276,7 +320,7 @@ def run_agent():
 
     ## Create a new SDK notification stream
     stream_id = create_sdk_stream()
-    
+
     ## Subscribe to 'config' notifications
     ## Only configuration of satellite YANG data models will be received
     add_sdk_config_subscription(stream_id)
@@ -288,7 +332,7 @@ def run_agent():
     for notification in notification_stream:
         process_notification(notification)
 
-			
+
 if __name__ == '__main__':
 
     ## configure SIGTERM handler
