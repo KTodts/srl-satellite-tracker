@@ -8,7 +8,6 @@ The satellite tracker agent fetches every x seconds the current location of the 
 Clone the repository and copy the rpm file to your SR Linux node
 ```
 scp rpm/srl-satellite-tracker-0.1.0.x86_64.rpm admin@clab-basic-srlinux1:/tmp
-
 ```
 Install the rpm package by logging into SR Linux cli and enter the linux bash shell
 ```
@@ -58,6 +57,7 @@ enter candidate
 set /system dns host-entry api.wheretheiss.at ipv4-address 69.164.207.240
 commit now
 ```
+**[Note]:** If you are running SR Linux with a docker image you may also need to add the DNS servers to `/etc/resolv.conf` manually.
 ### Configure sample interval
 The agent will fetch data every 10 seconds by default. This can be changed by setting the satellite interval
 ```
@@ -67,11 +67,12 @@ commit now
 ```
 ## Usage
 The ISS is represented on the map as a '#' character when the show satellite command is invoked. The longitude and latitude locations are converted to 2D coordinates on the ASCII map.
+
 ![](./img/esa.PNG)
 ![](./img/satellite-cli.gif)
 ### State
 The agent stores all retrieved information in the state data store. This allows us to do telemetry with [gNMIc](https://gnmic.kmrd.dev/) for example or visualize the data as json or in table view.
-![](./img/satellite-cli.gif)
+![](./img/satellite-state.gif)
 ### Start/Stop application
 ```
 A:srlinux1# / tools system app-management application satellite stop
