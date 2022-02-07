@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+# Copyright 2022 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # coding=utf-8
 import urllib.request
 import urllib.error
