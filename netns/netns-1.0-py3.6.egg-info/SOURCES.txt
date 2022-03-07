@@ -1,0 +1,8 @@
+README.md
+netns.py
+setup.cfg
+setup.py
+netns.egg-info/PKG-INFO
+netns.egg-info/SOURCES.txt
+netns.egg-info/dependency_links.txt
+netns.egg-info/top_level.txt
